@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>True Faith Church - Complete Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --neutral-dark: #1f2937;
+            --neutral: #374151;
+            --neutral-light: #f3f4f6;
+            --border: #e5e7eb;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        body.dark-mode {
+            --neutral-dark: #0f172a;
+            --neutral: #475569;
+            --neutral-light: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text-light: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--neutral-light);
+            color: var(--text);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.6s ease;
+        }
+
+        .dark-mode .login-box {
+            background: var(--neutral-light);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-box h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-box p {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .role-selector {
+            display: grid;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .role-option {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .role-option:hover {
+            border-color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+            color: var(--primary);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .login-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .login-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: none;
+            min-height: 100vh;
+            background: var(--neutral-light);
+        }
+
+        .main-layout.active {
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 2px solid var(--border);
+            padding: 2rem 0;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .sidebar {
+            background: var(--neutral-dark);
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(37, 99, 235, 0.08);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.15), transparent);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .header-title p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle, .logout-btn {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .dark-mode .theme-toggle,
+        .dark-mode .logout-btn {
+            background: var(--neutral-light);
+        }
+
+        .theme-toggle:hover, .logout-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .stat-card {
+            background: var(--neutral-light);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border: 2px solid transparent;
+        }
+
+        .stat-icon.blue {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .stat-icon.orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .stat-icon.purple {
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .stat-icon.red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode .table-container {
+            background: var(--neutral-light);
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            padding: 0.6rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .dark-mode .search-input {
+            background: var(--neutral-dark);
+            color: var(--text);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+            background-color: rgba(37, 99, 235, 0.02);
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background-color: rgba(37, 99, 235, 0.03);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 2px solid transparent;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-light);
+            border-color: var(--text-light);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .status-badge.approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .status-badge.present {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .status-badge.absent {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--border);
+            position: relative;
+        }
+
+        .dark-mode .modal-content {
+            background: var(--neutral-light);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .dark-mode .form-group input,
+        .dark-mode .form-group select,
+        .dark-mode .form-group textarea {
+            background: var(--neutral-dark);
+            color: var(--text);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--neutral-light);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            border-top: 2px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode .chart-container {
+            background: var(--neutral-light);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .simple-chart {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-end;
+            justify-content: space-around;
+            min-height: 250px;
+        }
+
+        .bar-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .bar {
+            background: linear-gradient(to top, var(--primary), var(--primary-light));
+            border-radius: 8px 8px 0 0;
+            width: 100%;
+            max-width: 50px;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid var(--primary);
+        }
+
+        .bar:hover {
+            transform: scaleY(1.1);
+            filter: brightness(1.1);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 1.2rem;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .dark-mode .action-btn {
+            background: var(--neutral-light);
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08));
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Divider Line */
+        .divider {
+            height: 2px;
+            background: var(--border);
+            margin: 2rem 0;
+        }
+
+        /* No Data Message */
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 1rem 0;
+            }
+
+            .sidebar-header {
+                text-align: center;
+                padding: 0 0.5rem 1.5rem;
+            }
+
+            .sidebar-header h2 {
+                font-size: 0.9rem;
+            }
+
+            .nav-item span:last-child {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .simple-chart {
+                gap: 0.5rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neutral);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 2px solid transparent;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Summary Row */
+        .summary-row {
+            background: rgba(37, 99, 235, 0.05);
+            padding: 1rem 1.5rem;
+            border-top: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            font-weight: 700;
+            display: none;
+        }
+
+        .summary-row.show {
+            display: table-row;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h1>⛪ True Faith Church</h1>
+            <p>Complete Management System</p>
+            
+            <label style="display: block; margin-bottom: 1rem; font-weight: 700;">Select Your Role:</label>
+            <div class="role-selector" id="roleSelector"></div>
+            
+            <button class="login-button" id="loginButton" disabled>🔓 Login</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="main-layout" id="mainLayout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>⛪</h2>
+                <small style="color: var(--text-light); display: block; margin-top: 0.5rem;">TFC</small>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+            <div style="padding: 0 1rem; margin-top: 3rem; border-top: 2px solid var(--border); padding-top: 1rem;">
+                <button class="nav-item" onclick="logout()" style="width: 100%; justify-content: center; color: var(--danger);">
+                    <span>🚪</span> <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-title">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="pageSubtitle">Welcome to True Faith Church Management System</p>
+                </div>
+                <div class="header-controls">
+                    <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+                    <div class="role-badge" id="roleBadge"></div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage"></div>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboardSection">
+                <div class="quick-actions" id="quickActions"></div>
+                
+                <div class="dashboard-grid" id="dashboardGrid"></div>
+
+                <div class="divider"></div>
+
+                <div class="chart-container">
+                    <div class="chart-title">📊 Weekly Attendance Trend</div>
+                    <div class="simple-chart" id="attendanceChart"></div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">💰 Monthly Financial Summary</div>
+                    <div class="simple-chart" id="financeChart"></div>
+                </div>
+            </div>
+
+            <!-- Members Section -->
+            <div class="content-section" id="membersSection">
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">👥 Church Members</div>
+                        <div class="table-controls">
+                            <input type="text" class="search-input" id="memberSearch" placeholder="🔍 Search members...">
+                            <button class="btn btn-primary btn-small" onclick="openModal('addMemberModal')">➕ Add</button>
+                        </div>
+                    </div>
+                    <table id="membersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Branch</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTableBody"></tbody>
+                    </table>
+                    <div id="membersSummary"></div>
+                </div>
+            </div>
+
+            <!-- Finance Section -->
+            <div class="content-section" id="financeSection">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Total Tithes</div>
+                                <div class="stat-value" id="totalTithes">₵0</div>
+                            </div>
+                            <div class="stat-icon blue">📊</div>
+                        </div>
+                        <div class="stat-change positive">↑ Updated</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Total Offerings</div>
+                                <div class="stat-value" id="totalOfferings">₵0</div>
+                            </div>
+                            <div class="stat-icon green">💚</div>
+                        </div>
+                        <div class="stat-change positive">↑ Updated</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Total Donations</div>
+                                <div class="stat-value" id="totalDonations">₵0</div>
+                            </div>
+                            <div class="stat-icon orange">🎁</div>
+                        </div>
+                        <div class="stat-change positive">↑ Updated</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Total Expenses</div>
+                                <div class="stat-value" id="totalExpenses">₵0</div>
+                            </div>
+                            <div class="stat-icon red">📉</div>
+                        </div>
+                        <div class="stat-change negative">↓ Deducted</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">💳 Financial Transactions</div>
+                        <div class="table-controls">
+                            <select class="search-input" id="financeFilter" onchange="filterFinance()">
+                                <option value="">All Types</option>
+                                <option value="tithe">Tithe</option>
+                                <option value="offering">Offering</option>
+                                <option value="donation">Donation</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                            <button class="btn btn-primary btn-small" onclick="openModal('addFinanceModal')">➕ Add</button>
+                        </div>
+                    </div>
+                    <table id="financeTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Branch</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeTableBody"></tbody>
+                    </table>
+                    <div id="financeSummary"></div>
+                </div>
+            </div>
+
+            <!-- Branches Section -->
+            <div class="content-section" id="branchesSection">
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">🏢 Church Branches</div>
+                        <button class="btn btn-primary btn-small" onclick="openModal('addBranchModal')">➕ Register</button>
+                    </div>
+                    <table id="branchesTable">
+                        <thead>
+                            <tr>
+                                <th>Branch Name</th>
+                                <th>Location</th>
+                                <th>Pastor</th>
+                                <th>Members</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchesTableBody"></tbody>
+                    </table>
+                    <div id="branchesSummary"></div>
+                </div>
+            </div>
+
+            <!-- Attendance Section -->
+            <div class="content-section" id="attendanceSection">
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">✅ Attendance Records</div>
+                        <div class="table-controls">
+                            <input type="date" class="search-input" id="attendanceDate">
+                            <button class="btn btn-primary btn-small" onclick="openModal('addAttendanceModal')">➕ Mark</button>
+                        </div>
+                    </div>
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Branch</th>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody"></tbody>
+                    </table>
+                    <div id="attendanceSummary"></div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="content-section" id="reportsSection">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Total Members</div>
+                                <div class="stat-value" id="reportTotalMembers">0</div>
+                            </div>
+                            <div class="stat-icon blue">👥</div>
+                        </div>
+                        <div class="stat-change positive">📈 All Branches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Avg Attendance</div>
+                                <div class="stat-value" id="reportAvgAttendance">0</div>
+                            </div>
+                            <div class="stat-icon green">✅</div>
+                        </div>
+                        <div class="stat-change positive">📈 This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Active Branches</div>
+                                <div class="stat-value" id="reportBranchGrowth">0</div>
+                            </div>
+                            <div class="stat-icon purple">🏢</div>
+                        </div>
+                        <div class="stat-change positive">✓ Operational</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Monthly Income</div>
+                                <div class="stat-value" id="reportMonthlyIncome">₵0</div>
+                            </div>
+                            <div class="stat-icon orange">💰</div>
+                        </div>
+                        <div class="stat-change positive">📈 Total Received</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="chart-container">
+                    <div class="chart-title">📈 Monthly Income Distribution</div>
+                    <div class="simple-chart" id="incomeChart"></div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">🏢 Members Per Branch</div>
+                    <div class="simple-chart" id="branchChart"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Add Member Modal -->
+    <div class="modal" id="addMemberModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('addMemberModal')">✕</button>
+            <div class="modal-header">
+                <h2>➕ Add New Member</h2>
+            </div>
+            <form onsubmit="addMember(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" required placeholder="Enter full name" id="memberName">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" required placeholder="Enter email address" id="memberEmail">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" required placeholder="Enter phone number" id="memberPhone">
+                </div>
+                <div class="form-group">
+                    <label>Branch *</label>
+                    <select required id="memberBranch">
+                        <option value="">Select Branch</option>
+                        <option value="Main Branch">Main Branch - Ikoyi</option>
+                        <option value="Lekki Branch">Lekki Branch</option>
+                        <option value="Abuja Branch">Abuja Branch</option>
+                        <option value="Lagos Island">Lagos Island Branch</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">✅ Add Member</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addMemberModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Finance Modal -->
+    <div class="modal" id="addFinanceModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('addFinanceModal')">✕</button>
+            <div class="modal-header">
+                <h2>💳 Record Transaction</h2>
+            </div>
+            <form onsubmit="addFinance(event)">
+                <div class="form-group">
+                    <label>Transaction Type *</label>
+                    <select required id="financeType">
+                        <option value="">Select Type</option>
+                        <option value="tithe">Tithe</option>
+                        <option value="offering">Offering</option>
+                        <option value="donation">Donation</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount *</label>
+                    <input type="number" required placeholder="Enter amount" min="1" id="financeAmount">
+                </div>
+                <div class="form-group">
+                    <label>Branch *</label>
+                    <select required id="financeBranch">
+                        <option value="">Select Branch</option>
+                        <option value="Main Branch">Main Branch</option>
+                        <option value="Lekki Branch">Lekki Branch</option>
+                        <option value="Abuja Branch">Abuja Branch</option>
+                        <option value="Lagos Island">Lagos Island Branch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" required id="financeDate">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea placeholder="Enter description" rows="3" id="financeDesc"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">✅ Record</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addFinanceModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Branch Modal -->
+    <div class="modal" id="addBranchModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('addBranchModal')">✕</button>
+            <div class="modal-header">
+                <h2>🏢 Register New Branch</h2>
+            </div>
+            <form onsubmit="addBranch(event)">
+                <div class="form-group">
+                    <label>Branch Name *</label>
+                    <input type="text" required placeholder="Enter branch name" id="branchName">
+                </div>
+                <div class="form-group">
+                    <label>Location/Address *</label>
+                    <textarea required placeholder="Enter location details" rows="3" id="branchLocation"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Branch Pastor *</label>
+                    <input type="text" required placeholder="Enter pastor's name" id="branchPastor">
+                </div>
+                <div class="form-group">
+                    <label>Contact Phone *</label>
+                    <input type="tel" required placeholder="Enter contact number" id="branchPhone">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">✅ Register</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addBranchModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Attendance Modal -->
+    <div class="modal" id="addAttendanceModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('addAttendanceModal')">✕</button>
+            <div class="modal-header">
+                <h2>✅ Mark Attendance</h2>
+            </div>
+            <form onsubmit="addAttendance(event)">
+                <div class="form-group">
+                    <label>Member *</label>
+                    <select required id="attendanceMember">
+                        <option value="">Select member...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" required id="attendanceRecordDate">
+                </div>
+                <div class="form-group">
+                    <label>Service *</label>
+                    <select required id="attendanceService">
+                        <option value="">Select Service</option>
+                        <option value="Saturday Service">Saturday Service</option>
+                        <option value="Wednesday Prayer">Wednesday Prayer</option>
+                        <option value="Friday Night">Friday Night Vigil</option>
+                        <option value="Thanksgiving">Thanksgiving Service</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select required id="attendanceStatus">
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">✅ Mark Present</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addAttendanceModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        const appData = {
+            members: [
+                { id: 'M001', name: 'John Doe', email: 'john@gmail.com', phone: '08012345678', branch: 'Main Branch', joinDate: '2023-01-15', status: 'active' },
+                { id: 'M002', name: 'Jane Smith', email: 'jane@gmail.com', phone: '08023456789', branch: 'Lekki Branch', joinDate: '2023-02-20', status: 'active' },
+                { id: 'M003', name: 'Pastor Michael', email: 'michael@gmail.com', phone: '08034567890', branch: 'Main Branch', joinDate: '2022-06-10', status: 'active' },
+                { id: 'M004', name: 'Sarah Johnson', email: 'sarah@gmail.com', phone: '08045678901', branch: 'Abuja Branch', joinDate: '2023-04-05', status: 'active' },
+                { id: 'M005', name: 'David Wilson', email: 'david@gmail.com', phone: '08056789012', branch: 'Lagos Island', joinDate: '2023-05-12', status: 'active' }
+            ],
+            finance: [
+                { id: 'F001', date: '2024-12-15', type: 'tithe', amount: 50000, branch: 'Main Branch', desc: 'Weekly tithe', status: 'recorded' },
+                { id: 'F002', date: '2024-12-14', type: 'offering', amount: 120000, branch: 'Lekki Branch', desc: 'Special offering', status: 'recorded' },
+                { id: 'F003', date: '2024-12-13', type: 'donation', amount: 250000, branch: 'Main Branch', desc: 'Building project', status: 'recorded' },
+                { id: 'F004', date: '2024-12-12', type: 'tithe', amount: 75000, branch: 'Abuja Branch', desc: 'Weekly tithe', status: 'recorded' },
+                { id: 'F005', date: '2024-12-11', type: 'offering', amount: 95000, branch: 'Main Branch', desc: 'Outreach program', status: 'pending' },
+                { id: 'F006', date: '2024-12-10', type: 'expense', amount: 30000, branch: 'Main Branch', desc: 'Maintenance', status: 'recorded' }
+            ],
+            branches: [
+                { id: 'B001', name: 'Main Branch', location: 'Ikoyi, Lagos', pastor: 'Pastor John', phone: '08012345678', members: 450, status: 'active' },
+                { id: 'B002', name: 'Lekki Branch', location: 'Lekki, Lagos', pastor: 'Pastor Peter', phone: '08023456789', members: 320, status: 'active' },
+                { id: 'B003', name: 'Abuja Branch', location: 'Wuse, Abuja', pastor: 'Pastor Paul', phone: '08034567890', members: 280, status: 'active' },
+                { id: 'B004', name: 'Lagos Island', location: 'Victoria Island', pastor: 'Pastor Samuel', phone: '08045678901', members: 200, status: 'approved' }
+            ],
+            attendance: [
+                { id: 'A001', member: 'John Doe', branch: 'Main Branch', date: '2024-12-14', service: 'Saturday Service', status: 'present' },
+                { id: 'A002', member: 'Jane Smith', branch: 'Lekki Branch', date: '2024-12-14', service: 'Saturday Service', status: 'present' },
+                { id: 'A003', member: 'Sarah Johnson', branch: 'Abuja Branch', date: '2024-12-14', service: 'Saturday Service', status: 'absent' },
+                { id: 'A004', member: 'David Wilson', branch: 'Main Branch', date: '2024-12-11', service: 'Wednesday Prayer', status: 'present' },
+                { id: 'A005', member: 'Pastor Michael', branch: 'Main Branch', date: '2024-12-14', service: 'Saturday Service', status: 'present' }
+            ]
+        };
+
+        const roles = {
+            super_admin: { name: 'Super Admin', icon: '👑', nav: ['dashboard', 'members', 'finance', 'branches', 'attendance', 'reports'] },
+            general_overseer: { name: 'General Overseer', icon: '📖', nav: ['dashboard', 'members', 'finance', 'branches', 'reports'] },
+            finance_officer: { name: 'Finance Officer', icon: '💰', nav: ['dashboard', 'finance', 'reports'] },
+            branch_admin: { name: 'Branch Admin', icon: '🏢', nav: ['dashboard', 'members', 'finance', 'attendance'] },
+            pastor: { name: 'Pastor', icon: '⛪', nav: ['dashboard', 'members', 'attendance'] },
+            regular_member: { name: 'Regular Member', icon: '👤', nav: ['dashboard'] }
+        };
+
+        const navItems = {
+            dashboard: { label: 'Dashboard', icon: '📊' },
+            members: { label: 'Members', icon: '👥' },
+            finance: { label: 'Finance', icon: '💰' },
+            branches: { label: 'Branches', icon: '🏢' },
+            attendance: { label: 'Attendance', icon: '✅' },
+            reports: { label: 'Reports', icon: '📈' }
+        };
+
+        let currentRole = null;
+
+        // Initialize
+        function init() {
+            renderRoleSelector();
+            setupEventListeners();
+        }
+
+        function renderRoleSelector() {
+            const container = document.getElementById('roleSelector');
+            let html = '';
+            for (const [key, role] of Object.entries(roles)) {
+                html += '<button class="role-option" onclick="selectRole(\'' + key + '\')" data-role="' + key + '">' +
+                    role.icon + ' ' + role.name +
+                    '</button>';
+            }
+            container.innerHTML = html;
+        }
+
+        function selectRole(role) {
+            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+            document.querySelector('[data-role="' + role + '"]').classList.add('selected');
+            currentRole = role;
+            document.getElementById('loginButton').disabled = false;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('loginButton').addEventListener('click', login);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('memberSearch').addEventListener('keyup', searchMembers);
+            document.getElementById('attendanceDate').addEventListener('change', filterAttendance);
+        }
+
+        function login() {
+            if (!currentRole) return;
+            
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('mainLayout').classList.add('active');
+            
+            document.getElementById('roleBadge').textContent = roles[currentRole].icon + ' ' + roles[currentRole].name;
+            document.getElementById('pageTitle').textContent = 'Dashboard';
+            document.getElementById('pageSubtitle').textContent = 'Welcome, ' + roles[currentRole].name + '!';
+            
+            renderNavigation();
+            loadDashboard();
+            populateAttendanceSelect();
+        }
+
+        function renderNavigation() {
+            const nav = document.getElementById('sidebarNav');
+            const userNav = roles[currentRole].nav;
+            
+            let html = '';
+            userNav.forEach(navKey => {
+                const isActive = navKey === 'dashboard' ? 'active' : '';
+                html += '<button class="nav-item ' + isActive + '" onclick="switchSection(\'' + navKey + '\')">' +
+                    '<span>' + navItems[navKey].icon + '</span>' +
+                    '<span>' + navItems[navKey].label + '</span>' +
+                    '</button>';
+            });
+            nav.innerHTML = html;
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.nav-item')?.classList.add('active');
+            
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            const sectionEl = document.getElementById(section + 'Section');
+            if (sectionEl) sectionEl.classList.add('active');
+            
+            document.getElementById('pageTitle').textContent = navItems[section]?.label || 'Dashboard';
+            document.getElementById('pageSubtitle').textContent = navItems[section]?.label + ' Management';
+            
+            if (section === 'members') loadMembers();
+            else if (section === 'finance') loadFinance();
+            else if (section === 'branches') loadBranches();
+            else if (section === 'attendance') loadAttendance();
+            else if (section === 'reports') loadReports();
+        }
+
+        function loadDashboard() {
+            const quickActions = document.getElementById('quickActions');
+            quickActions.innerHTML = '<button class="action-btn" onclick="openModal(\'addMemberModal\')">👥 Add Member</button>' +
+                '<button class="action-btn" onclick="openModal(\'addFinanceModal\')">💰 Add Finance</button>' +
+                '<button class="action-btn" onclick="openModal(\'addAttendanceModal\')">✅ Attendance</button>' +
+                '<button class="action-btn" onclick="switchSection(\'reports\')">📈 Reports</button>';
+            
+            const grid = document.getElementById('dashboardGrid');
+            const totalMembers = appData.members.length;
+            const totalBranches = appData.branches.length;
+            const totalIncome = appData.finance.filter(f => ['tithe', 'offering', 'donation'].includes(f.type)).reduce((a, b) => a + b.amount, 0);
+            const attendanceThisWeek = appData.attendance.filter(a => a.status === 'present').length;
+
+            let html = '<div class="stat-card"><div class="stat-card-header"><div><div class="stat-label">Total Members</div><div class="stat-value">' + totalMembers + '</div></div><div class="stat-icon blue">👥</div></div><div class="stat-change positive">↑ Active</div></div>' +
+                '<div class="stat-card"><div class="stat-card-header"><div><div class="stat-label">This Week Attendance</div><div class="stat-value">' + attendanceThisWeek + '</div></div><div class="stat-icon green">✅</div></div><div class="stat-change positive">↑ Present</div></div>' +
+                '<div class="stat-card"><div class="stat-card-header"><div><div class="stat-label">Active Branches</div><div class="stat-value">' + totalBranches + '</div></div><div class="stat-icon purple">🏢</div></div><div class="stat-change positive">✓ Operational</div></div>' +
+                '<div class="stat-card"><div class="stat-card-header"><div><div class="stat-label">Total Income</div><div class="stat-value">₵' + (totalIncome/1000000).toFixed(1) + 'M</div></div><div class="stat-icon orange">💰</div></div><div class="stat-change positive">↑ Recorded</div></div>';
+
+            grid.innerHTML = html;
+
+            generateAttendanceChart();
+            generateFinanceChart();
+        }
+
+        function generateAttendanceChart() {
+            const data = [150, 200, 180, 220, 250, 850, 120];
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Sat', 'Fri'];
+            const maxHeight = Math.max(...data);
+            
+            const chart = document.getElementById('attendanceChart');
+            let html = '';
+            data.forEach((val, i) => {
+                html += '<div class="bar-wrapper"><div class="bar" style="height: ' + ((val / maxHeight) * 200) + 'px;"><span class="bar-value">' + val + '</span></div><span class="bar-label">' + days[i] + '</span></div>';
+            });
+            chart.innerHTML = html;
+        }
+
+        function generateFinanceChart() {
+            const types = ['Tithes', 'Offerings', 'Donations', 'Expenses'];
+            const amounts = [
+                appData.finance.filter(f => f.type === 'tithe').reduce((a, b) => a + b.amount, 0),
+                appData.finance.filter(f => f.type === 'offering').reduce((a, b) => a + b.amount, 0),
+                appData.finance.filter(f => f.type === 'donation').reduce((a, b) => a + b.amount, 0),
+                appData.finance.filter(f => f.type === 'expense').reduce((a, b) => a + b.amount, 0)
+            ];
+            const maxHeight = Math.max(...amounts);
+            
+            const chart = document.getElementById('financeChart');
+            let html = '';
+            amounts.forEach((val, i) => {
+                html += '<div class="bar-wrapper"><div class="bar" style="height: ' + ((val / maxHeight) * 200) + 'px; background: linear-gradient(to top, #7c3aed, #a78bfa);"><span class="bar-value">₵' + (val/1000).toFixed(0) + 'K</span></div><span class="bar-label">' + types[i] + '</span></div>';
+            });
+            chart.innerHTML = html;
+        }
+
+        function loadMembers(searchTerm = '') {
+            const filtered = searchTerm 
+                ? appData.members.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                : appData.members;
+
+            const tbody = document.getElementById('membersTableBody');
+            let html = '';
+            filtered.forEach(member => {
+                html += '<tr><td><strong>' + member.id + '</strong></td><td>' + member.name + '</td><td>' + member.email + '</td><td>' + member.phone + '</td><td>' + member.branch + '</td><td>' + member.joinDate + '</td><td><span class="status-badge ' + member.status + '">' + member.status + '</span></td><td><button class="btn btn-secondary btn-small" onclick="deleteMember(\'' + member.id + '\')">❌</button></td></tr>';
+            });
+            if (filtered.length === 0) {
+                html = '<tr><td colspan="8" class="no-data">No members found</td></tr>';
+            }
+            tbody.innerHTML = html;
+
+            const summary = document.getElementById('membersSummary');
+            summary.innerHTML = '<tr class="summary-row show"><td colspan="7"></td><td style="text-align: right;"><strong>Total: ' + filtered.length + '</strong></td></tr>';
+        }
+
+        function searchMembers() {
+            const searchTerm = document.getElementById('memberSearch').value;
+            loadMembers(searchTerm);
+        }
+
+        function loadFinance(filterType = '') {
+            const filtered = filterType 
+                ? appData.finance.filter(f => f.type === filterType)
+                : appData.finance;
+
+            updateFinanceStats();
+
+            const tbody = document.getElementById('financeTableBody');
+            let html = '';
+            filtered.forEach(record => {
+                html += '<tr><td>' + record.date + '</td><td><strong>' + record.type.toUpperCase() + '</strong></td><td><strong>₵' + record.amount.toLocaleString() + '</strong></td><td>' + record.branch + '</td><td>' + record.desc + '</td><td><span class="status-badge ' + record.status + '">' + record.status + '</span></td><td><button class="btn btn-danger btn-small" onclick="deleteFinance(\'' + record.id + '\')">❌</button></td></tr>';
+            });
+            if (filtered.length === 0) {
+                html = '<tr><td colspan="7" class="no-data">No transactions found</td></tr>';
+            }
+            tbody.innerHTML = html;
+
+            const summary = document.getElementById('financeSummary');
+            const total = filtered.reduce((a, b) => a + b.amount, 0);
+            summary.innerHTML = '<tr class="summary-row show"><td colspan="2"></td><td style="text-align: right;"><strong>Total: ₵' + total.toLocaleString() + '</strong></td><td colspan="4"></td></tr>';
+        }
+
+        function filterFinance() {
+            const filterValue = document.getElementById('financeFilter').value;
+            loadFinance(filterValue);
+        }
+
+        function updateFinanceStats() {
+            const tithes = appData.finance.filter(f => f.type === 'tithe').reduce((a, b) => a + b.amount, 0);
+            const offerings = appData.finance.filter(f => f.type === 'offering').reduce((a, b) => a + b.amount, 0);
+            const donations = appData.finance.filter(f => f.type === 'donation').reduce((a, b) => a + b.amount, 0);
+            const expenses = appData.finance.filter(f => f.type === 'expense').reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('totalTithes').textContent = '₵' + (tithes / 1000).toFixed(0) + 'K';
+            document.getElementById('totalOfferings').textContent = '₵' + (offerings / 1000).toFixed(0) + 'K';
+            document.getElementById('totalDonations').textContent = '₵' + (donations / 1000).toFixed(0) + 'K';
+            document.getElementById('totalExpenses').textContent = '₵' + (expenses / 1000).toFixed(0) + 'K';
+        }
+
+        function loadBranches() {
+            const tbody = document.getElementById('branchesTableBody');
+            let html = '';
+            appData.branches.forEach(branch => {
+                html += '<tr><td><strong>' + branch.name + '</strong></td><td>' + branch.location + '</td><td>' + branch.pastor + '</td><td><strong>' + branch.members + '</strong></td><td><span class="status-badge ' + branch.status + '">' + branch.status + '</span></td><td><button class="btn btn-secondary btn-small" onclick="editBranch(\'' + branch.id + '\')">✏️</button></td></tr>';
+            });
+            tbody.innerHTML = html;
+
+            const summary = document.getElementById('branchesSummary');
+            const totalMembers = appData.branches.reduce((a, b) => a + b.members, 0);
+            summary.innerHTML = '<tr class="summary-row show"><td colspan="3"></td><td><strong>Total Members: ' + totalMembers + '</strong></td><td colspan="2"></td></tr>';
+        }
+
+        function loadAttendance(filterDate = '') {
+            const filtered = filterDate
+                ? appData.attendance.filter(a => a.date === filterDate)
+                : appData.attendance;
+
+            const tbody = document.getElementById('attendanceTableBody');
+            let html = '';
+            filtered.forEach(att => {
+                html += '<tr><td>' + att.member + '</td><td>' + att.branch + '</td><td>' + att.date + '</td><td>' + att.service + '</td><td><span class="status-badge ' + att.status + '">' + att.status + '</span></td><td><button class="btn btn-danger btn-small" onclick="deleteAttendance(\'' + att.id + '\')">❌</button></td></tr>';
+            });
+            if (filtered.length === 0) {
+                html = '<tr><td colspan="6" class="no-data">No attendance records</td></tr>';
+            }
+            tbody.innerHTML = html;
+
+            const summary = document.getElementById('attendanceSummary');
+            const present = filtered.filter(a => a.status === 'present').length;
+            summary.innerHTML = '<tr class="summary-row show"><td colspan="4"></td><td><strong>Present: ' + present + '/' + filtered.length + '</strong></td><td></td></tr>';
+        }
+
+        function filterAttendance() {
+            const filterDate = document.getElementById('attendanceDate').value;
+            loadAttendance(filterDate);
+        }
+
+        function loadReports() {
+            const totalMembers = appData.members.length;
+            const avgAttendance = Math.round(appData.attendance.filter(a => a.status === 'present').length / 7);
+            const activeBranches = appData.branches.filter(b => b.status === 'active').length;
+            const monthlyIncome = appData.finance.filter(f => ['tithe', 'offering', 'donation'].includes(f.type)).reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('reportTotalMembers').textContent = totalMembers;
+            document.getElementById('reportAvgAttendance').textContent = avgAttendance;
+            document.getElementById('reportBranchGrowth').textContent = activeBranches;
+            document.getElementById('reportMonthlyIncome').textContent = '₵' + (monthlyIncome / 1000000).toFixed(1) + 'M';
+
+            generateIncomeChart();
+            generateBranchChart();
+        }
+
+        function generateIncomeChart() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const amounts = [1200000, 1500000, 1800000, 1600000, 2000000, 2500000];
+            const maxHeight = Math.max(...amounts);
+            
+            const chart = document.getElementById('incomeChart');
+            let html = '';
+            amounts.forEach((val, i) => {
+                html += '<div class="bar-wrapper"><div class="bar" style="height: ' + ((val / maxHeight) * 200) + 'px; background: linear-gradient(to top, #f59e0b, #fcd34d);"><span class="bar-value">₵' + (val/1000000).toFixed(1) + 'M</span></div><span class="bar-label">' + months[i] + '</span></div>';
+            });
+            chart.innerHTML = html;
+        }
+
+        function generateBranchChart() {
+            const branches = appData.branches.map(b => b.name);
+            const members = appData.branches.map(b => b.members);
+            const maxHeight = Math.max(...members);
+            
+            const chart = document.getElementById('branchChart');
+            let html = '';
+            members.forEach((val, i) => {
+                html += '<div class="bar-wrapper"><div class="bar" style="height: ' + ((val / maxHeight) * 200) + 'px; background: linear-gradient(to top, #10b981, #6ee7b7);"><span class="bar-value">' + val + '</span></div><span class="bar-label" style="width: 100%;">' + branches[i].split(' ')[0] + '</span></div>';
+            });
+            chart.innerHTML = html;
+        }
+
+        function populateAttendanceSelect() {
+            const select = document.getElementById('attendanceMember');
+            let options = '';
+            appData.members.forEach(m => {
+                options += '<option value="' + m.name + '">' + m.name + '</option>';
+            });
+            select.innerHTML += options;
+        }
+
+        // Form Handlers
+        function addMember(e) {
+            e.preventDefault();
+            const newMember = {
+                id: 'M' + (appData.members.length + 1).toString().padStart(3, '0'),
+                name: document.getElementById('memberName').value,
+                email: document.getElementById('memberEmail').value,
+                phone: document.getElementById('memberPhone').value,
+                branch: document.getElementById('memberBranch').value,
+                joinDate: new Date().toISOString().split('T')[0],
+                status: 'active'
+            };
+            appData.members.push(newMember);
+            closeModal('addMemberModal');
+            loadMembers();
+            showSuccess('✅ Member added successfully!');
+            document.querySelector('#addMemberModal form').reset();
+        }
+
+        function addFinance(e) {
+            e.preventDefault();
+            const newRecord = {
+                id: 'F' + (appData.finance.length + 1).toString().padStart(3, '0'),
+                date: document.getElementById('financeDate').value,
+                type: document.getElementById('financeType').value,
+                amount: parseInt(document.getElementById('financeAmount').value),
+                branch: document.getElementById('financeBranch').value,
+                desc: document.getElementById('financeDesc').value,
+                status: 'recorded'
+            };
+            appData.finance.push(newRecord);
+            closeModal('addFinanceModal');
+            loadFinance();
+            updateFinanceStats();
+            generateFinanceChart();
+            showSuccess('✅ Transaction recorded successfully!');
+            document.querySelector('#addFinanceModal form').reset();
+        }
+
+        function addBranch(e) {
+            e.preventDefault();
+            const newBranch = {
+                id: 'B' + (appData.branches.length + 1).toString().padStart(3, '0'),
+                name: document.getElementById('branchName').value,
+                location: document.getElementById('branchLocation').value,
+                pastor: document.getElementById('branchPastor').value,
+                phone: document.getElementById('branchPhone').value,
+                members: 0,
+                status: 'approved'
+            };
+            appData.branches.push(newBranch);
+            closeModal('addBranchModal');
+            loadBranches();
+            loadDashboard();
+            showSuccess('✅ Branch registered successfully!');
+            document.querySelector('#addBranchModal form').reset();
+        }
+
+        function addAttendance(e) {
+            e.preventDefault();
+            const newRecord = {
+                id: 'A' + (appData.attendance.length + 1).toString().padStart(3, '0'),
+                member: document.getElementById('attendanceMember').value,
+                branch: appData.members.find(m => m.name === document.getElementById('attendanceMember').value)?.branch || 'Unknown',
+                date: document.getElementById('attendanceRecordDate').value,
+                service: document.getElementById('attendanceService').value,
+                status: document.getElementById('attendanceStatus').value
+            };
+            appData.attendance.push(newRecord);
+            closeModal('addAttendanceModal');
+            loadAttendance();
+            generateAttendanceChart();
+            showSuccess('✅ Attendance marked successfully!');
+            document.querySelector('#addAttendanceModal form').reset();
+        }
+
+        function deleteMember(id) {
+            if (confirm('Are you sure you want to delete this member?')) {
+                appData.members = appData.members.filter(m => m.id !== id);
+                loadMembers();
+                showSuccess('✅ Member deleted successfully!');
+            }
+        }
+
+        function deleteFinance(id) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                appData.finance = appData.finance.filter(f => f.id !== id);
+                loadFinance();
+                updateFinanceStats();
+                showSuccess('✅ Record deleted successfully!');
+            }
+        }
+
+        function deleteAttendance(id) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                appData.attendance = appData.attendance.filter(a => a.id !== id);
+                loadAttendance();
+                showSuccess('✅ Attendance deleted successfully!');
+            }
+        }
+
+        function editBranch(id) {
+            alert('Edit functionality for branches');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const toggle = document.getElementById('themeToggle');
+            toggle.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light' : '🌙 Dark';
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                document.getElementById('mainLayout').classList.remove('active');
+                document.getElementById('loginContainer').style.display = 'flex';
+                currentRole = null;
+                document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+            }
+        }
+
+        function showSuccess(message) {
+            const msg = document.getElementById('successMessage');
+            msg.textContent = message;
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 3000);
+        }
+
+        // Click outside modal to close
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
